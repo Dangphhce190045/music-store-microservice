@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.fpt.mss.dto.request.ArtistRequest;
 import vn.edu.fpt.mss.dto.response.ArtistResponse;
 import vn.edu.fpt.mss.entity.Artist;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.ArtistRepository;
 import vn.edu.fpt.mss.service.ArtistService;
 

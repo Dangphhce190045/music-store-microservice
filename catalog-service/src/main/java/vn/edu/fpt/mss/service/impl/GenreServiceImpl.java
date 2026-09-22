@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.fpt.mss.dto.request.GenreRequest;
 import vn.edu.fpt.mss.dto.response.GenreResponse;
 import vn.edu.fpt.mss.entity.Genre;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.GenreRepository;
 import vn.edu.fpt.mss.service.GenreService;
 

@@ -16,7 +16,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
+import vn.edu.fpt.mss.common.entity.BaseEntity;
 
 @Getter
 @Setter
@@ -26,8 +27,8 @@ import org.hibernate.annotations.Where;
 @Entity
 @Table(name = "Track")
 @SQLDelete(sql = "UPDATE Track SET IsDeleted = 1 WHERE TrackId = ?")
-@Where(clause = "IsDeleted = 0")
-public class Track {
+@SQLRestriction("IsDeleted = 0")
+public class Track extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +61,34 @@ public class Track {
 
     @Column(name = "UnitPrice", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
+
+    @Column(name = "PreviewUrl", length = 500)
+    private String previewUrl;
+
+    @Column(name = "StreamUrl", length = 500)
+    private String streamUrl;
+
+    @Column(name = "TrackNumber")
+    private Integer trackNumber;
+
+    @Column(name = "DiscNumber")
+    private Integer discNumber;
+
+    @Column(name = "IsrcCode", length = 15)
+    private String isrcCode;
+
+    @Column(name = "IsExplicit", nullable = false)
+    private boolean explicit;
+
+    @Column(name = "Lyrics")
+    private String lyrics;
+
+    @Column(name = "PlayCount", nullable = false)
+    private long playCount;
+
+    @Builder.Default
+    @Column(name = "Status", nullable = false, length = 20)
+    private String status = "PUBLISHED";
 
     @Column(name = "IsDeleted", nullable = false)
     private boolean deleted;

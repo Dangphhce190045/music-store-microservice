@@ -1,0 +1,193 @@
+version: '3.8'
+
+services:
+  # =======================================================
+  # Database: Microsoft SQL Server 2022
+  # =======================================================
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: chinook-sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD:-Password123!}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    networks:
+      - chinook-net
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $${MSSQL_SA_PASSWORD} -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # =======================================================
+  # DB Initializer: Tự động tạo 5 DBs (Catalog, Customer, Invoice, Payment, Library)
+  # =======================================================
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: chinook-sqlserver-init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD:-Password123!}"
+    volumes:
+      - ./setup-databases.sql:/setup-databases.sql
+      - ./init-databases.sh:/init-databases.sh
+    entrypoint: ["/bin/bash", "/init-databases.sh"]
+    networks:
+      - chinook-net
+    restart: "no"
+
+  # =======================================================
+  # 1. Catalog Service (Port 8081)
+  # =======================================================
+  catalog-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: catalog-service
+    container_name: chinook-catalog-service
+    restart: unless-stopped
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_USER=sa
+      - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+    networks:
+      - chinook-net
+    profiles:
+      - apps
+      - all
+
+  # =======================================================
+  # 2. Customer Service (Port 8082)
+  # =======================================================
+  customer-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: customer-service
+    container_name: chinook-customer-service
+    restart: unless-stopped
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_USER=sa
+      - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+    networks:
+      - chinook-net
+    profiles:
+      - apps
+      - all
+
+  # =======================================================
+  # 3. Invoice Service (Port 8083)
+  # =======================================================
+  invoice-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: invoice-service
+    container_name: chinook-invoice-service
+    restart: unless-stopped
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+      customer-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_USER=sa
+      - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+      - CUSTOMER_SERVICE_URL=http://customer-service:8082
+      - CATALOG_SERVICE_URL=http://catalog-service:8081
+    networks:
+      - chinook-net
+    profiles:
+      - apps
+      - all
+
+  # =======================================================
+  # 4. Payment Service (Port 8084)
+  # =======================================================
+  payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: payment-service
+    container_name: chinook-payment-service
+    restart: unless-stopped
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    ports:
+      - "8084:8084"
+    environment:
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_USER=sa
+      - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+    networks:
+      - chinook-net
+    profiles:
+      - apps
+      - all
+
+  # =======================================================
+  # 5. Library Service (Port 8085)
+  # =======================================================
+  library-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: library-service
+    container_name: chinook-library-service
+    restart: unless-stopped
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    ports:
+      - "8085:8085"
+    environment:
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_USER=sa
+      - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+    networks:
+      - chinook-net
+    profiles:
+      - apps
+      - all
+
+networks:
+  chinook-net:
+    driver: bridge
+
+volumes:
+  mssql_data:
+    driver: local

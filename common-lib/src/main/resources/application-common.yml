@@ -1,0 +1,83 @@
+# =========================================================
+# Enterprise Spring Boot Shared Configuration (MSS Common Lib)
+# Inherited by all microservices via:
+# spring.config.import: "classpath:application-common.yml"
+# =========================================================
+
+spring:
+  # -------------------------------------------------------
+  # Cấu hình DataSource & Hikari Connection Pool chuẩn Enterprise
+  # -------------------------------------------------------
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:123456}
+    hikari:
+      pool-name: ${spring.application.name:mss}-hikari-pool
+      maximum-pool-size: 15
+      minimum-idle: 3
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+      leak-detection-threshold: 30000
+
+  # -------------------------------------------------------
+  # Cấu hình Spring Data JPA / Hibernate
+  # -------------------------------------------------------
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+  # -------------------------------------------------------
+  # Cấu hình Database Migration tự động với Flyway
+  # -------------------------------------------------------
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+
+# ---------------------------------------------------------
+# Server Graceful Shutdown (Chờ hoàn tất request khi dừng container)
+# ---------------------------------------------------------
+server:
+  shutdown: graceful
+
+# ---------------------------------------------------------
+# Cấu hình Giám sát Actuator, Healthcheck, Probes
+# ---------------------------------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+# ---------------------------------------------------------
+# Cấu hình Swagger / OpenAPI Documentation
+# ---------------------------------------------------------
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# ---------------------------------------------------------
+# Logging chuẩn
+# ---------------------------------------------------------
+logging:
+  level:
+    root: INFO
+    vn.edu.fpt.mss: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

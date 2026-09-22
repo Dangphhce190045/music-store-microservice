@@ -9,7 +9,7 @@ import vn.edu.fpt.mss.dto.response.AlbumResponse;
 import vn.edu.fpt.mss.dto.response.ArtistResponse;
 import vn.edu.fpt.mss.entity.Album;
 import vn.edu.fpt.mss.entity.Artist;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.AlbumRepository;
 import vn.edu.fpt.mss.repository.ArtistRepository;
 import vn.edu.fpt.mss.service.AlbumService;

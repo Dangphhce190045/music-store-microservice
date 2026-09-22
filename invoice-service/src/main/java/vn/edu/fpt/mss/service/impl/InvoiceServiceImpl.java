@@ -18,7 +18,7 @@ import vn.edu.fpt.mss.dto.response.InvoiceLineResponse;
 import vn.edu.fpt.mss.dto.response.InvoiceResponse;
 import vn.edu.fpt.mss.entity.Invoice;
 import vn.edu.fpt.mss.entity.InvoiceLine;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.InvoiceRepository;
 import vn.edu.fpt.mss.service.InvoiceService;
 

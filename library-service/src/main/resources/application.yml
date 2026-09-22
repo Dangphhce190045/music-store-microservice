@@ -1,0 +1,10 @@
+spring:
+  config:
+    import: "classpath:application-common.yml"
+  application:
+    name: library-service
+  datasource:
+    url: jdbc:sqlserver://${DB_HOST:localhost}:${DB_PORT:1433};databaseName=chinook_library;encrypt=false
+
+server:
+  port: 8085

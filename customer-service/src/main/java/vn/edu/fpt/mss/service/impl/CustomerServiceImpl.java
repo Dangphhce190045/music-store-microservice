@@ -9,7 +9,7 @@ import vn.edu.fpt.mss.dto.response.CustomerResponse;
 import vn.edu.fpt.mss.dto.response.EmployeeResponse;
 import vn.edu.fpt.mss.entity.Customer;
 import vn.edu.fpt.mss.entity.Employee;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.CustomerRepository;
 import vn.edu.fpt.mss.repository.EmployeeRepository;
 import vn.edu.fpt.mss.service.CustomerService;

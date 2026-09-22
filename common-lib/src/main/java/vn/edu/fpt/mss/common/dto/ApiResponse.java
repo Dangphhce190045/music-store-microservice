@@ -42,11 +42,28 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> success(T data) {
+        return ok(data);
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return ok(message, data);
+    }
+
     public static <T> ApiResponse<T> created(T data) {
         return ApiResponse.<T>builder()
                 .success(true)
                 .status(201)
                 .message("Resource created successfully")
+                .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> created(String message, T data) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .status(201)
+                .message(message)
                 .data(data)
                 .build();
     }

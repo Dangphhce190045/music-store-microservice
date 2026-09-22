@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.edu.fpt.mss.common.entity.BaseEntity;
 
 @Getter
 @Setter
@@ -26,12 +27,15 @@ import lombok.Setter;
 @Builder
 @Entity
 @Table(name = "Invoice")
-public class Invoice {
+public class Invoice extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "InvoiceId")
     private Integer invoiceId;
+
+    @Column(name = "InvoiceCode", length = 50)
+    private String invoiceCode;
 
     @Column(name = "CustomerId", nullable = false)
     private Integer customerId;
@@ -60,8 +64,33 @@ public class Invoice {
     @Column(name = "BillingPostalCode", length = 10)
     private String billingPostalCode;
 
+    @Column(name = "SubTotal", precision = 10, scale = 2)
+    private BigDecimal subTotal;
+
+    @Builder.Default
+    @Column(name = "DiscountAmount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = "TaxAmount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
     @Column(name = "Total", nullable = false, precision = 10, scale = 2)
     private BigDecimal total;
+
+    @Builder.Default
+    @Column(name = "PaymentStatus", nullable = false, length = 30)
+    private String paymentStatus = "PAID";
+
+    @Builder.Default
+    @Column(name = "PaymentMethod", length = 50)
+    private String paymentMethod = "CREDIT_CARD";
+
+    @Column(name = "PaymentTransactionId", length = 100)
+    private String paymentTransactionId;
+
+    @Column(name = "PaidAt")
+    private LocalDateTime paidAt;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default

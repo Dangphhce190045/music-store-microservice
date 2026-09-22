@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.mss.dto.request.EmployeeRequest;
 import vn.edu.fpt.mss.dto.response.EmployeeResponse;
 import vn.edu.fpt.mss.entity.Employee;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.EmployeeRepository;
 import vn.edu.fpt.mss.service.EmployeeService;
 

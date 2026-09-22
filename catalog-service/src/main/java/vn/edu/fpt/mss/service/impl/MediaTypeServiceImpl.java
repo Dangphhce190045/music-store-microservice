@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.fpt.mss.dto.request.MediaTypeRequest;
 import vn.edu.fpt.mss.dto.response.MediaTypeResponse;
 import vn.edu.fpt.mss.entity.MediaType;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.MediaTypeRepository;
 import vn.edu.fpt.mss.service.MediaTypeService;
 

@@ -14,7 +14,7 @@ import vn.edu.fpt.mss.entity.Album;
 import vn.edu.fpt.mss.entity.Genre;
 import vn.edu.fpt.mss.entity.MediaType;
 import vn.edu.fpt.mss.entity.Track;
-import vn.edu.fpt.mss.exception.ResourceNotFoundException;
+import vn.edu.fpt.mss.common.exception.ResourceNotFoundException;
 import vn.edu.fpt.mss.repository.AlbumRepository;
 import vn.edu.fpt.mss.repository.GenreRepository;
 import vn.edu.fpt.mss.repository.MediaTypeRepository;

@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.edu.fpt.mss.common.entity.BaseEntity;
 
 @Getter
 @Setter
@@ -19,7 +20,7 @@ import lombok.Setter;
 @Builder
 @Entity
 @Table(name = "Artist")
-public class Artist {
+public class Artist extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +29,19 @@ public class Artist {
 
     @Column(name = "Name", length = 120)
     private String name;
+
+    @Column(name = "ImageUrl", length = 500)
+    private String imageUrl;
+
+    @Column(name = "BannerUrl", length = 500)
+    private String bannerUrl;
+
+    @Column(name = "Bio")
+    private String bio;
+
+    @Column(name = "IsVerified", nullable = false)
+    private boolean verified;
+
+    @Column(name = "Country", length = 50)
+    private String country;
 }
