@@ -11,32 +11,34 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>payment-service</artifactId>
+    <artifactId>discovery-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>payment-service</name>
-    <description>Payment microservice for digital music orders</description>
+    <name>discovery-server</name>
+    <description>Eureka Service Registry for MSS microservices</description>
 
     <dependencies>
-        <!-- Internal Common Module -->
+        <!-- Eureka Server -->
         <dependency>
-            <groupId>vn.edu.fpt.mss</groupId>
-            <artifactId>common-lib</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </dependency>
+    
+        <!-- Spring Boot Web (embedded Tomcat, Eureka dashboard) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Actuator for health checks -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <scope>runtime</scope>
-        </dependency>
 
-        <!-- Eureka Client — đăng ký service vào Service Registry -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -46,7 +48,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>vn.edu.fpt.mss.PaymentServiceApplication</mainClass>
+                    <mainClass>vn.edu.fpt.mss.DiscoveryServerApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

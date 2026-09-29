@@ -1,0 +1,141 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lower-case-service-id: true
+
+      routes:
+        # =====================================================
+        # Route 1: CATALOG SERVICE
+        # Mọi request /api/catalog/** → catalog-service
+        # =====================================================
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/catalog/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: catalogServiceCB
+                fallbackUri: forward:/fallback/catalog
+
+        # =====================================================
+        # Route 2: CUSTOMER SERVICE
+        # =====================================================
+        - id: customer-service
+          uri: lb://customer-service
+          predicates:
+            - Path=/api/customers/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: customerServiceCB
+                fallbackUri: forward:/fallback/customer
+
+        # =====================================================
+        # Route 3: INVOICE SERVICE
+        # =====================================================
+        - id: invoice-service
+          uri: lb://invoice-service
+          predicates:
+            - Path=/api/invoices/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: invoiceServiceCB
+                fallbackUri: forward:/fallback/invoice
+
+        # =====================================================
+        # Route 4: PAYMENT SERVICE
+        # =====================================================
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: paymentServiceCB
+                fallbackUri: forward:/fallback/payment
+
+        # =====================================================
+        # Route 5: LIBRARY SERVICE
+        # =====================================================
+        - id: library-service
+          uri: lb://library-service
+          predicates:
+            - Path=/api/library/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: libraryServiceCB
+                fallbackUri: forward:/fallback/library
+
+      # Global default filters applied to all routes
+      default-filters:
+        - AddRequestHeader=X-Gateway-Version, 1.0
+
+      # Global CORS configuration
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+# -------------------------------------------------------
+# Eureka Client — Gateway dùng lb:// để route qua Eureka
+# -------------------------------------------------------
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    health-check-url-path: /actuator/health
+
+# -------------------------------------------------------
+# Actuator Health
+# -------------------------------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+# -------------------------------------------------------
+# Logging
+# -------------------------------------------------------
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: INFO
+    vn.edu.fpt.mss: DEBUG
+    reactor.netty: INFO

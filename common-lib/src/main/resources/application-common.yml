@@ -81,3 +81,25 @@ logging:
     vn.edu.fpt.mss: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+
+# ---------------------------------------------------------
+# Eureka Client Configuration
+# Tất cả microservices kế thừa config này và tự đăng ký vào Eureka.
+# spring.application.name của mỗi service được dùng làm tên instance.
+# ---------------------------------------------------------
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
+    # Lấy registry để gọi service khác qua tên (load balancing)
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    # Dùng IP thay vì hostname (quan trọng khi chạy Docker)
+    prefer-ip-address: true
+    # Healthcheck qua Actuator /health
+    health-check-url-path: /actuator/health
+    # Interval gửi heartbeat (giây)
+    lease-renewal-interval-in-seconds: 15
+    # Thời gian timeout nếu mất heartbeat (giây)
+    lease-expiration-duration-in-seconds: 45

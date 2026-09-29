@@ -44,6 +44,65 @@ services:
     restart: "no"
 
   # =======================================================
+  # Discovery Server: Eureka Service Registry (Port 8761)
+  # Phải khởi động trước tất cả microservices
+  # Dashboard: http://localhost:8761
+  # =======================================================
+  discovery-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: discovery-server
+    container_name: chinook-discovery-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    networks:
+      - chinook-net
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    profiles:
+      - apps
+      - all
+
+  # =======================================================
+  # API Gateway: Single Entry Point (Port 8080)
+  # Tất cả client requests đi qua đây
+  # Routes: /api/catalog/**, /api/customers/**, v.v.
+  # =======================================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: api-gateway
+    container_name: chinook-api-gateway
+    restart: unless-stopped
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_HOST=discovery-server
+    networks:
+      - chinook-net
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    profiles:
+      - apps
+      - all
+
+  # =======================================================
   # 1. Catalog Service (Port 8081)
   # =======================================================
   catalog-service:
@@ -57,6 +116,8 @@ services:
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully
+      discovery-server:
+        condition: service_healthy
     ports:
       - "8081:8081"
     environment:
@@ -64,6 +125,7 @@ services:
       - DB_PORT=1433
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+      - EUREKA_HOST=discovery-server
     networks:
       - chinook-net
     profiles:
@@ -84,6 +146,8 @@ services:
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully
+      discovery-server:
+        condition: service_healthy
     ports:
       - "8082:8082"
     environment:
@@ -91,6 +155,7 @@ services:
       - DB_PORT=1433
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+      - EUREKA_HOST=discovery-server
     networks:
       - chinook-net
     profiles:
@@ -111,6 +176,8 @@ services:
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully
+      discovery-server:
+        condition: service_healthy
       customer-service:
         condition: service_started
       catalog-service:
@@ -124,6 +191,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
       - CUSTOMER_SERVICE_URL=http://customer-service:8082
       - CATALOG_SERVICE_URL=http://catalog-service:8081
+      - EUREKA_HOST=discovery-server
     networks:
       - chinook-net
     profiles:
@@ -144,6 +212,8 @@ services:
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully
+      discovery-server:
+        condition: service_healthy
     ports:
       - "8084:8084"
     environment:
@@ -151,6 +221,7 @@ services:
       - DB_PORT=1433
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+      - EUREKA_HOST=discovery-server
     networks:
       - chinook-net
     profiles:
@@ -171,6 +242,8 @@ services:
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully
+      discovery-server:
+        condition: service_healthy
     ports:
       - "8085:8085"
     environment:
@@ -178,6 +251,7 @@ services:
       - DB_PORT=1433
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
+      - EUREKA_HOST=discovery-server
     networks:
       - chinook-net
     profiles:

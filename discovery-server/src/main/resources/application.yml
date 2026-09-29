@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: discovery-server
+
+server:
+  port: 8761
+
+# -------------------------------------------------------
+# Eureka Server Configuration
+# Tắt self-registration (server không tự đăng ký vào chính nó)
+# Tắt fetch-registry (server không cần fetch registry từ peer)
+# -------------------------------------------------------
+eureka:
+  instance:
+    hostname: ${EUREKA_HOST:localhost}
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    # Tắt self-preservation mode ở môi trường dev (tránh hiển thị WARNING đỏ)
+    enable-self-preservation: false
+    # Thời gian dọn dẹp instance hết hạn (ms)
+    eviction-interval-timer-in-ms: 5000
+    # Thời gian chờ trước khi đưa instance vào registry lần đầu
+    wait-time-in-ms-when-sync-empty: 0
+
+# -------------------------------------------------------
+# Actuator Health
+# -------------------------------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# -------------------------------------------------------
+# Logging
+# -------------------------------------------------------
+logging:
+  level:
+    root: INFO
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN
+    vn.edu.fpt.mss: DEBUG
