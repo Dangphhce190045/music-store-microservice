@@ -15,3 +15,7 @@ application:
       url: ${CUSTOMER_SERVICE_URL:http://localhost:8082}
     catalog-service:
       url: ${CATALOG_SERVICE_URL:http://localhost:8081}
+    payment-service:
+      url: ${PAYMENT_SERVICE_URL:http://localhost:8084}
+    library-service:
+      url: ${LIBRARY_SERVICE_URL:http://localhost:8085}

@@ -45,4 +45,10 @@ public class PaymentController {
         }
         throw new IllegalArgumentException("Either invoiceId or customerId must be provided");
     }
+
+    @PostMapping("/{id}/refund")
+    @Operation(summary = "Refund a payment transaction (Saga compensation)")
+    public PaymentResponse refundPayment(@PathVariable Integer id) {
+        return paymentService.refundPayment(id);
+    }
 }

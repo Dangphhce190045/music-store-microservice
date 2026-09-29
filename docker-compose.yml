@@ -44,6 +44,23 @@ services:
     restart: "no"
 
   # =======================================================
+  # Redis: Cache & Rate Limiting (Port 6379)
+  # =======================================================
+  redis:
+    image: redis:7-alpine
+    container_name: chinook-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - chinook-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # =======================================================
   # Discovery Server: Eureka Service Registry (Port 8761)
   # Phải khởi động trước tất cả microservices
   # Dashboard: http://localhost:8761

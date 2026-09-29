@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import vn.edu.fpt.mss.dto.request.CheckoutRequest;
 import vn.edu.fpt.mss.dto.request.InvoiceRequest;
+import vn.edu.fpt.mss.dto.response.CheckoutResponse;
 import vn.edu.fpt.mss.dto.response.InvoiceResponse;
 import vn.edu.fpt.mss.service.InvoiceService;
 
@@ -58,5 +60,12 @@ public class InvoiceController {
     @Operation(summary = "Delete an invoice")
     public void delete(@PathVariable Integer id) {
         invoiceService.delete(id);
+    }
+
+    @PostMapping("/checkout")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Full checkout: create invoice → process payment → grant track entitlements")
+    public CheckoutResponse checkout(@Valid @RequestBody CheckoutRequest request) {
+        return invoiceService.checkout(request);
     }
 }

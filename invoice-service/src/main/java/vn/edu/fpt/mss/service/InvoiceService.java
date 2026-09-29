@@ -1,7 +1,9 @@
 package vn.edu.fpt.mss.service;
 
 import java.util.List;
+import vn.edu.fpt.mss.dto.request.CheckoutRequest;
 import vn.edu.fpt.mss.dto.request.InvoiceRequest;
+import vn.edu.fpt.mss.dto.response.CheckoutResponse;
 import vn.edu.fpt.mss.dto.response.InvoiceResponse;
 
 public interface InvoiceService {
@@ -17,4 +19,6 @@ public interface InvoiceService {
     InvoiceResponse update(Integer id, InvoiceRequest request);
 
     void delete(Integer id);
+
+    CheckoutResponse checkout(CheckoutRequest request);
 }

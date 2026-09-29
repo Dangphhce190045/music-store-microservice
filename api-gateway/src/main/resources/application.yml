@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   cloud:
     compatibility-verifier:
       enabled: false
@@ -16,14 +20,14 @@ spring:
       routes:
         # =====================================================
         # Route 1: CATALOG SERVICE
-        # Mọi request /api/catalog/** → catalog-service
+        # /api/catalog/v1/** → catalog-service /api/v1/**
         # =====================================================
         - id: catalog-service
           uri: lb://catalog-service
           predicates:
             - Path=/api/catalog/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/catalog/(?<segment>.*), /api/${segment}
             - name: CircuitBreaker
               args:
                 name: catalogServiceCB
@@ -31,13 +35,14 @@ spring:
 
         # =====================================================
         # Route 2: CUSTOMER SERVICE
+        # /api/customers/v1/** → customer-service /api/v1/**
         # =====================================================
         - id: customer-service
           uri: lb://customer-service
           predicates:
             - Path=/api/customers/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/customers/(?<segment>.*), /api/${segment}
             - name: CircuitBreaker
               args:
                 name: customerServiceCB
@@ -45,13 +50,14 @@ spring:
 
         # =====================================================
         # Route 3: INVOICE SERVICE
+        # /api/invoices/v1/** → invoice-service /api/v1/**
         # =====================================================
         - id: invoice-service
           uri: lb://invoice-service
           predicates:
             - Path=/api/invoices/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/invoices/(?<segment>.*), /api/${segment}
             - name: CircuitBreaker
               args:
                 name: invoiceServiceCB
@@ -59,13 +65,14 @@ spring:
 
         # =====================================================
         # Route 4: PAYMENT SERVICE
+        # /api/payments/v1/** → payment-service /api/v1/**
         # =====================================================
         - id: payment-service
           uri: lb://payment-service
           predicates:
             - Path=/api/payments/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/payments/(?<segment>.*), /api/${segment}
             - name: CircuitBreaker
               args:
                 name: paymentServiceCB
@@ -73,13 +80,14 @@ spring:
 
         # =====================================================
         # Route 5: LIBRARY SERVICE
+        # /api/library/v1/** → library-service /api/v1/**
         # =====================================================
         - id: library-service
           uri: lb://library-service
           predicates:
             - Path=/api/library/**
           filters:
-            - StripPrefix=2
+            - RewritePath=/api/library/(?<segment>.*), /api/${segment}
             - name: CircuitBreaker
               args:
                 name: libraryServiceCB
@@ -88,6 +96,12 @@ spring:
       # Global default filters applied to all routes
       default-filters:
         - AddRequestHeader=X-Gateway-Version, 1.0
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 20
+            redis-rate-limiter.burstCapacity: 40
+            redis-rate-limiter.requestedTokens: 1
+            key-resolver: "#{@ipKeyResolver}"
 
       # Global CORS configuration
       globalcors:

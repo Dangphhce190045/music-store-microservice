@@ -70,6 +70,19 @@ public class PaymentServiceImpl implements PaymentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public PaymentResponse refundPayment(Integer transactionId) {
+        log.warn("[Saga Compensation] Processing refund for payment transaction ID: {}", transactionId);
+        PaymentTransaction transaction = paymentRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment transaction not found with ID: " + transactionId));
+        transaction.setStatus(PaymentStatus.REFUNDED);
+        transaction.setNote("Compensating transaction: Refunded due to downstream order failure");
+        PaymentTransaction saved = paymentRepository.save(transaction);
+        log.info("[Saga Compensation] Refund completed successfully for transaction ID: {}", transactionId);
+        return mapToResponse(saved);
+    }
+
     private PaymentResponse mapToResponse(PaymentTransaction entity) {
         return PaymentResponse.builder()
                 .transactionId(entity.getTransactionId())

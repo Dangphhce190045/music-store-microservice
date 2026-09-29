@@ -9,4 +9,5 @@ public interface PaymentService {
     PaymentResponse getPaymentById(Integer transactionId);
     List<PaymentResponse> getPaymentsByInvoiceId(Integer invoiceId);
     List<PaymentResponse> getPaymentsByCustomerId(Integer customerId);
+    PaymentResponse refundPayment(Integer transactionId);
 }
