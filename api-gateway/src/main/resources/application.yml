@@ -1,155 +1,16 @@
+# =======================================================
+# API Gateway — Bootstrap Configuration
+# Detailed routing, filters, and rate-limiting are loaded
+# dynamically from Spring Cloud Config Server (api-gateway.yml)
+# =======================================================
 server:
   port: 8080
 
 spring:
   application:
     name: api-gateway
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
   cloud:
     compatibility-verifier:
       enabled: false
-    gateway:
-      discovery:
-        locator:
-          enabled: false
-          lower-case-service-id: true
-
-      routes:
-        # =====================================================
-        # Route 1: CATALOG SERVICE
-        # /api/catalog/v1/** → catalog-service /api/v1/**
-        # =====================================================
-        - id: catalog-service
-          uri: lb://catalog-service
-          predicates:
-            - Path=/api/catalog/**
-          filters:
-            - RewritePath=/api/catalog/(?<segment>.*), /api/${segment}
-            - name: CircuitBreaker
-              args:
-                name: catalogServiceCB
-                fallbackUri: forward:/fallback/catalog
-
-        # =====================================================
-        # Route 2: CUSTOMER SERVICE
-        # /api/customers/v1/** → customer-service /api/v1/**
-        # =====================================================
-        - id: customer-service
-          uri: lb://customer-service
-          predicates:
-            - Path=/api/customers/**
-          filters:
-            - RewritePath=/api/customers/(?<segment>.*), /api/${segment}
-            - name: CircuitBreaker
-              args:
-                name: customerServiceCB
-                fallbackUri: forward:/fallback/customer
-
-        # =====================================================
-        # Route 3: INVOICE SERVICE
-        # /api/invoices/v1/** → invoice-service /api/v1/**
-        # =====================================================
-        - id: invoice-service
-          uri: lb://invoice-service
-          predicates:
-            - Path=/api/invoices/**
-          filters:
-            - RewritePath=/api/invoices/(?<segment>.*), /api/${segment}
-            - name: CircuitBreaker
-              args:
-                name: invoiceServiceCB
-                fallbackUri: forward:/fallback/invoice
-
-        # =====================================================
-        # Route 4: PAYMENT SERVICE
-        # /api/payments/v1/** → payment-service /api/v1/**
-        # =====================================================
-        - id: payment-service
-          uri: lb://payment-service
-          predicates:
-            - Path=/api/payments/**
-          filters:
-            - RewritePath=/api/payments/(?<segment>.*), /api/${segment}
-            - name: CircuitBreaker
-              args:
-                name: paymentServiceCB
-                fallbackUri: forward:/fallback/payment
-
-        # =====================================================
-        # Route 5: LIBRARY SERVICE
-        # /api/library/v1/** → library-service /api/v1/**
-        # =====================================================
-        - id: library-service
-          uri: lb://library-service
-          predicates:
-            - Path=/api/library/**
-          filters:
-            - RewritePath=/api/library/(?<segment>.*), /api/${segment}
-            - name: CircuitBreaker
-              args:
-                name: libraryServiceCB
-                fallbackUri: forward:/fallback/library
-
-      # Global default filters applied to all routes
-      default-filters:
-        - AddRequestHeader=X-Gateway-Version, 1.0
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 20
-            redis-rate-limiter.burstCapacity: 40
-            redis-rate-limiter.requestedTokens: 1
-            key-resolver: "#{@ipKeyResolver}"
-
-      # Global CORS configuration
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOriginPatterns: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
-            maxAge: 3600
-
-# -------------------------------------------------------
-# Eureka Client — Gateway dùng lb:// để route qua Eureka
-# -------------------------------------------------------
-eureka:
-  client:
-    service-url:
-      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
-    fetch-registry: true
-    register-with-eureka: true
-  instance:
-    prefer-ip-address: true
-    health-check-url-path: /actuator/health
-
-# -------------------------------------------------------
-# Actuator Health
-# -------------------------------------------------------
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,gateway
-  endpoint:
-    health:
-      show-details: always
-
-# -------------------------------------------------------
-# Logging
-# -------------------------------------------------------
-logging:
-  level:
-    root: INFO
-    org.springframework.cloud.gateway: INFO
-    vn.edu.fpt.mss: DEBUG
-    reactor.netty: INFO
+  config:
+    import: "optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:${CONFIG_SERVER_PORT:8888}/"

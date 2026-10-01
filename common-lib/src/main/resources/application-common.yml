@@ -5,6 +5,8 @@
 # =========================================================
 
 spring:
+  config:
+    import: "optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:${CONFIG_SERVER_PORT:8888}/"
   # -------------------------------------------------------
   # Cấu hình DataSource & Hikari Connection Pool chuẩn Enterprise
   # -------------------------------------------------------

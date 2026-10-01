@@ -61,8 +61,20 @@ services:
       retries: 5
 
   # =======================================================
+  # Zipkin: Distributed Tracing Dashboard (Port 9411)
+  # UI: http://localhost:9411
+  # =======================================================
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: chinook-zipkin
+    restart: unless-stopped
+    ports:
+      - "9411:9411"
+    networks:
+      - chinook-net
+
+  # =======================================================
   # Discovery Server: Eureka Service Registry (Port 8761)
-  # Phải khởi động trước tất cả microservices
   # Dashboard: http://localhost:8761
   # =======================================================
   discovery-server:
@@ -78,19 +90,43 @@ services:
     networks:
       - chinook-net
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 15s
       timeout: 5s
       retries: 8
       start_period: 30s
-    profiles:
-      - apps
-      - all
+
+  # =======================================================
+  # Config Server: Centralized Configuration (Port 8888)
+  # =======================================================
+  config-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: config-server
+    container_name: chinook-config-server
+    restart: unless-stopped
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8888:8888"
+    environment:
+      - EUREKA_HOST=discovery-server
+    volumes:
+      - ./config-repo:/config-repo
+    networks:
+      - chinook-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
 
   # =======================================================
   # API Gateway: Single Entry Point (Port 8080)
-  # Tất cả client requests đi qua đây
-  # Routes: /api/catalog/**, /api/customers/**, v.v.
   # =======================================================
   api-gateway:
     build:
@@ -103,21 +139,25 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
       - EUREKA_HOST=discovery-server
+      - CONFIG_SERVER_HOST=config-server
+      - REDIS_HOST=redis
+      - ZIPKIN_HOST=zipkin
     networks:
       - chinook-net
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 15s
       timeout: 5s
       retries: 6
-      start_period: 45s
-    profiles:
-      - apps
-      - all
+      start_period: 40s
 
   # =======================================================
   # 1. Catalog Service (Port 8081)
@@ -135,6 +175,8 @@ services:
         condition: service_completed_successfully
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
     ports:
       - "8081:8081"
     environment:
@@ -143,11 +185,10 @@ services:
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
       - EUREKA_HOST=discovery-server
+      - CONFIG_SERVER_HOST=config-server
+      - ZIPKIN_HOST=zipkin
     networks:
       - chinook-net
-    profiles:
-      - apps
-      - all
 
   # =======================================================
   # 2. Customer Service (Port 8082)
@@ -165,6 +206,8 @@ services:
         condition: service_completed_successfully
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
     ports:
       - "8082:8082"
     environment:
@@ -173,11 +216,10 @@ services:
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
       - EUREKA_HOST=discovery-server
+      - CONFIG_SERVER_HOST=config-server
+      - ZIPKIN_HOST=zipkin
     networks:
       - chinook-net
-    profiles:
-      - apps
-      - all
 
   # =======================================================
   # 3. Invoice Service (Port 8083)
@@ -195,10 +237,8 @@ services:
         condition: service_completed_successfully
       discovery-server:
         condition: service_healthy
-      customer-service:
-        condition: service_started
-      catalog-service:
-        condition: service_started
+      config-server:
+        condition: service_healthy
     ports:
       - "8083:8083"
     environment:
@@ -208,12 +248,13 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
       - CUSTOMER_SERVICE_URL=http://customer-service:8082
       - CATALOG_SERVICE_URL=http://catalog-service:8081
+      - PAYMENT_SERVICE_URL=http://payment-service:8084
+      - LIBRARY_SERVICE_URL=http://library-service:8085
       - EUREKA_HOST=discovery-server
+      - CONFIG_SERVER_HOST=config-server
+      - ZIPKIN_HOST=zipkin
     networks:
       - chinook-net
-    profiles:
-      - apps
-      - all
 
   # =======================================================
   # 4. Payment Service (Port 8084)
@@ -231,6 +272,8 @@ services:
         condition: service_completed_successfully
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
     ports:
       - "8084:8084"
     environment:
@@ -239,11 +282,10 @@ services:
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
       - EUREKA_HOST=discovery-server
+      - CONFIG_SERVER_HOST=config-server
+      - ZIPKIN_HOST=zipkin
     networks:
       - chinook-net
-    profiles:
-      - apps
-      - all
 
   # =======================================================
   # 5. Library Service (Port 8085)
@@ -261,6 +303,8 @@ services:
         condition: service_completed_successfully
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
     ports:
       - "8085:8085"
     environment:
@@ -269,11 +313,10 @@ services:
       - DB_USER=sa
       - DB_PASSWORD=${DB_PASSWORD:-Password123!}
       - EUREKA_HOST=discovery-server
+      - CONFIG_SERVER_HOST=config-server
+      - ZIPKIN_HOST=zipkin
     networks:
       - chinook-net
-    profiles:
-      - apps
-      - all
 
 networks:
   chinook-net:
