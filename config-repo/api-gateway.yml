@@ -76,6 +76,44 @@ spring:
                 name: libraryServiceCB
                 fallbackUri: forward:/fallback/library
 
+        # =======================================================
+        # Swagger OpenAPI Aggregator Routes (lb:// forwarding)
+        # =======================================================
+        - id: catalog-docs
+          uri: lb://catalog-service
+          predicates:
+            - Path=/v3/api-docs/catalog
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: customer-docs
+          uri: lb://customer-service
+          predicates:
+            - Path=/v3/api-docs/customer
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: invoice-docs
+          uri: lb://invoice-service
+          predicates:
+            - Path=/v3/api-docs/invoice
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: payment-docs
+          uri: lb://payment-service
+          predicates:
+            - Path=/v3/api-docs/payment
+          filters:
+            - SetPath=/v3/api-docs
+
+        - id: library-docs
+          uri: lb://library-service
+          predicates:
+            - Path=/v3/api-docs/library
+          filters:
+            - SetPath=/v3/api-docs
+
       # Global default filters applied to all routes
       default-filters:
         - AddRequestHeader=X-Gateway-Version, 1.0
@@ -101,3 +139,26 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
+
+# =======================================================
+# Swagger / OpenAPI UI Central Aggregator
+# Dropdown menu trên Gateway xem tài liệu toàn bộ 5 services
+# =======================================================
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: 1. Catalog Service (Tracks, Albums, Artists)
+        url: /v3/api-docs/catalog
+      - name: 2. Customer Service (Customers, Employees)
+        url: /v3/api-docs/customer
+      - name: 3. Invoice Service (Orders, Billing, Saga)
+        url: /v3/api-docs/invoice
+      - name: 4. Payment Service (Transactions, Refunds)
+        url: /v3/api-docs/payment
+      - name: 5. Library Service (Entitlements, Playlists)
+        url: /v3/api-docs/library

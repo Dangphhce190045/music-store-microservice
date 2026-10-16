@@ -67,10 +67,15 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- OpenAPI / Swagger Documentation -->
+            <!-- OpenAPI / Swagger Documentation (WebMVC & WebFlux) -->
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
             </dependency>
         </dependencies>

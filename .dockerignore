@@ -1,0 +1,39 @@
+# =========================================================
+# .dockerignore - TayJava & Enterprise Industrial Standard
+# Không gửi rác và bí mật vào Docker Daemon Build Context
+# =========================================================
+
+# Version Control & IDE
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+*.iml
+*.iws
+*.ipr
+
+# Secrets & Environment variables (Tuyệt đối không nhúng vào layer)
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# Build Output & Logs (Chỉ lấy target cần thiết qua ARG/COPY)
+**/target/generated-sources
+**/target/generated-test-sources
+**/target/test-classes
+**/target/surefire-reports
+**/target/failsafe-reports
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Documentation & Temporary Files
+*.md
+!README.md
+docs/
+.DS_Store
+Thumbs.db
